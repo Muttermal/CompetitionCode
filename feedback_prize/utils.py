@@ -8,9 +8,6 @@ import time
 import torch
 import typing
 
-logger = logging.getLogger(__name__)
-logger.setLevel(level=logging.INFO)
-
 
 class Timer(object):
     """Computes elapsed time."""
@@ -171,7 +168,7 @@ def convert_batch(batch: typing.Union[list, dict]) -> dict:
     if isinstance(batch, dict):
         result = batch
     else:
-        result = {"text_id": [i["text_id"][0] for i in batch]}
+        result = {"text_id": [i["text_id"][0] for i in batch]}  # tqdm会增加一个[]，导致tensor shape多了一维
         used_keys = {k for k in batch[0].keys() if k != "text_id"}
         for key in used_keys:
             result[key] = torch.stack([i[key][0] for i in batch], dim=0).view(len(batch), -1)
@@ -179,10 +176,35 @@ def convert_batch(batch: typing.Union[list, dict]) -> dict:
 
 
 def file_split(file_path: str, split_size: float = 0.8, out_file: list = None):
-    # train = df.sample(frac=0.8, random_state=200)  # random state is a seed value
-    # test = df.drop(train.index)
     raw_data = pd.read_csv(file_path)
-    split_mask = np.random.rand(len(raw_data)) < split_size
-    train_data, test_data = raw_data[split_mask], raw_data[~split_mask]
+    train_data = raw_data.sample(frac=split_size, random_state=200)  # random state is a seed value
+    test_data = raw_data.drop(train_data.index)
+    # split_mask = np.random.rand(len(raw_data)) < split_size
+    # train_data, test_data = raw_data[split_mask], raw_data[~split_mask]
     train_data.to_csv(out_file[0])
     test_data.to_csv(out_file[1])
+
+
+def set_logger(log_file: str = 'log.txt', level: str = "info"):
+    assert level.upper() in {"INFO", "DEBUG", "WARNING", "ERROR", "CRITICAL"}
+    log_level = getattr(logging, level.upper())
+    logger = logging.getLogger(__name__)
+    logger.setLevel(log_level)
+    formatter = logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s: - %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S')
+
+    # 使用FileHandler输出到文件
+    fh = logging.FileHandler(filename=log_file, mode="a", encoding="utf-8")
+    fh.setLevel(log_level)
+    fh.setFormatter(formatter)
+
+    # 使用StreamHandler输出到屏幕
+    ch = logging.StreamHandler()
+    ch.setLevel(log_level)
+    ch.setFormatter(formatter)
+
+    logger.addHandler(ch)
+    logger.addHandler(fh)
+
+    return logger

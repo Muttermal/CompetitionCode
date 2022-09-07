@@ -5,7 +5,7 @@ import typing
 import pandas as pd
 import random
 import torch
-from torch.utils.data import Dataset, IterableDataset
+from torch.utils.data import IterableDataset
 from transformers.tokenization_utils import PreTrainedTokenizer
 
 

@@ -1,8 +1,8 @@
 # !/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import numpy as np
 import logging
+import numpy as np
 import pandas as pd
 import time
 import torch
@@ -175,36 +175,27 @@ def convert_batch(batch: typing.Union[list, dict]) -> dict:
     return result
 
 
-def file_split(file_path: str, split_size: float = 0.8, out_file: list = None):
+def data_split(file_path: str, split_size: float = 0.8, random_seed: int = 2022):
     raw_data = pd.read_csv(file_path)
-    train_data = raw_data.sample(frac=split_size, random_state=200)  # random state is a seed value
-    test_data = raw_data.drop(train_data.index)
+    train_data = raw_data.sample(frac=split_size, random_state=random_seed).reset_index(drop=True)
+    val_data = raw_data.drop(train_data.index).reset_index(drop=True)
+    return train_data, val_data
     # split_mask = np.random.rand(len(raw_data)) < split_size
     # train_data, test_data = raw_data[split_mask], raw_data[~split_mask]
-    train_data.to_csv(out_file[0])
-    test_data.to_csv(out_file[1])
+    # train_data.to_csv(out_file[0])
+    # test_data.to_csv(out_file[1])
 
 
-def set_logger(log_file: str = 'log.txt', level: str = "info"):
+def set_logger(log_file: str = 'log.txt', level: str = "info", name: str = None):
     assert level.upper() in {"INFO", "DEBUG", "WARNING", "ERROR", "CRITICAL"}
     log_level = getattr(logging, level.upper())
-    logger = logging.getLogger(__name__)
-    logger.setLevel(log_level)
-    formatter = logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s: - %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S')
-
-    # 使用FileHandler输出到文件
-    fh = logging.FileHandler(filename=log_file, mode="a", encoding="utf-8")
-    fh.setLevel(log_level)
-    fh.setFormatter(formatter)
-
-    # 使用StreamHandler输出到屏幕
-    ch = logging.StreamHandler()
-    ch.setLevel(log_level)
-    ch.setFormatter(formatter)
-
-    logger.addHandler(ch)
-    logger.addHandler(fh)
-
+    logging.basicConfig(
+        format='[%(asctime)s] - %(message)s',
+        datefmt='%Y/%m/%d %H:%M:%S',
+        level=log_level,
+        handlers=[
+            logging.FileHandler(log_file),
+            logging.StreamHandler()
+        ])
+    logger = logging.getLogger(name)
     return logger

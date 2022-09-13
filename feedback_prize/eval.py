@@ -3,6 +3,7 @@
 # @Time    : 2022/9/1 17:50
 # @Author  : Zhang Guangyi
 # @File    : eval.py
+
 import numpy as np
 from sklearn.metrics import mean_squared_error
 import torch
@@ -26,7 +27,7 @@ def mcr_mse(y_true, y_pred):
 
 
 def validation(model: torch.nn.Module = None, dataloader: DataLoader = None,
-               metric: Callable = None, criteria=None) -> dict:
+               metric: Callable = None) -> dict:
     eval_loss = AvgMeter("Eval Loss")
     true_label = []
     model_result = []
@@ -36,12 +37,11 @@ def validation(model: torch.nn.Module = None, dataloader: DataLoader = None,
             for step, batch in pbar:
                 batch = convert_batch(batch)
                 labels = batch["label"]
-                curr_model_res = model(input_ids=batch["input_ids"],
-                                       attention_mask=batch["attention_mask"],
-                                       token_type_ids=batch["token_type_ids"])
-                if criteria:
-                    curr_loss = criteria(curr_model_res, labels)
-                    eval_loss.update(curr_loss.item())
+                curr_model_res, curr_loss = model(input_ids=batch["input_ids"],
+                                                  attention_mask=batch["attention_mask"],
+                                                  token_type_ids=batch["token_type_ids"],
+                                                  label=labels)
+                eval_loss.update(curr_loss.item())
                 true_label.extend(labels.cpu().numpy())
                 model_result.extend(curr_model_res.cpu().numpy())
     eval_result = metric(y_pred=model_result, y_true=true_label)

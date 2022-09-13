@@ -1,9 +1,9 @@
 # !/usr/bin/env python
 # -*- coding: utf-8 -*-
-import typing
 
 import pandas as pd
 import random
+import typing
 import torch
 from torch.utils.data import IterableDataset
 from transformers.tokenization_utils import PreTrainedTokenizer

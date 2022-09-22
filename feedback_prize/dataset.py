@@ -1,8 +1,9 @@
-# !/usr/bin/env python
+﻿# !/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import pandas as pd
 import random
+import re
 import typing
 import torch
 from torch.utils.data import IterableDataset
@@ -34,6 +35,7 @@ class MyDataset(IterableDataset):
             data = pd.read_csv(self.data)
         else:
             raise ValueError(f"The type of data should be str or pd.DataFrame, but got {type(self.data)}")
+        data.loc[:, 'full_text'] = data.full_text.apply(lambda x: self.get_only_chars(x))
         data_size = data.shape[0]
         data_keys = data_keys if data_keys else data.columns.tolist()
         used_data = data.loc[:, data_keys].to_dict()
@@ -74,3 +76,25 @@ class MyDataset(IterableDataset):
         if not self.drop_last:
             dataset_length += 1
         return dataset_length
+
+    @staticmethod
+    def get_only_chars(line):
+        """英文文本清理"""
+        clean_line = ""
+        line = line.replace("’", "")
+        line = line.replace("'", "")
+        line = line.replace("-", " ")  # replace hyphens with spaces
+        line = line.replace("\t", " ")
+        line = line.replace("\n", " ")
+        line = line.lower()
+
+        for char in line:
+            if char in 'qwertyuiopasdfghjklzxcvbnm ':
+                clean_line += char
+            else:
+                clean_line += ' '
+
+        clean_line = re.sub(' +', ' ', clean_line)  # delete extra spaces
+        if clean_line[0] == ' ':
+            clean_line = clean_line[1:]
+        return clean_line

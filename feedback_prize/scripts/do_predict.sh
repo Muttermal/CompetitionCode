@@ -1,0 +1,1 @@
+python predicter.py --config=configs/deberta_v3_large.yaml

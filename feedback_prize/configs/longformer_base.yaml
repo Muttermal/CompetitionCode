@@ -1,0 +1,28 @@
+# model
+pre_train_model_path: "../../pre_trained_model/NLP/longformer-base-4096"
+out_size: 6
+dropout_rate: [0.1, 0.2, 0.3]
+
+# data
+batch_size: 4
+seq_len: 3000
+num_workers: 0
+train_data_path: "./data/ori_train.csv"
+test_data_path: "./data/test.csv"
+target_cols: ["cohesion", "syntax", "vocabulary", "phraseology", "grammar", "conventions"]
+
+# training
+weight_decay: 1.0e-6
+lr: 3.0e-5
+max_lr: 3.0e-5
+min_lr: 1.0e-6
+epochs: 20
+metric_key: "MCRMSE"
+patience: 3
+max_norm: 10
+enabel_awp: true
+adv_lr: 1.0e-3    # 对抗训练lr
+adv_eps: 1.0e-3   # 对抗训练eps
+
+# save
+model_save_path: "./saved_model/longformer_0917/"

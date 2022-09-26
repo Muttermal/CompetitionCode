@@ -4,27 +4,30 @@ out_size: 6
 dropout_rate: [0.1, 0.2, 0.3]
 
 # data
-batch_size: 2
-seq_len: 640
+batch_size: 12
+seq_len: 512
 num_workers: 0
 train_data_path: "./data/ori_train.csv"
+eval_data_path: ""  # 为空时，从训练数据中划分，此时需指定划分系数n_fold(n_fold!=1);不为空时，n_fold必须为1
 test_data_path: "./data/test.csv"
-target_cols: ["cohesion", "syntax", "vocabulary", "phraseology", "grammar", "conventions"]
+target_cols: ["cohesion", "syntax", "vocabulary", "phraseology", "grammar", "conventions"]  # 数据中的标签列名
+model_load_path: "" # 载入模型，为空时使用预训练模型
 
 # training
+version: 0  # 模型版本
 weight_decay: 1.0e-6
 lr: 2.0e-5
 min_lr: 1.0e-7
 epochs: 20
 metric_key: "MCRMSE"
-patience: 5
+patience: 8
 max_norm: 10
-enabel_awp: false
+enabel_awp: true # 是否启用对抗训练
 adv_lr: 1.0e-3    # 对抗训练lr
 adv_eps: 1.0e-3   # 对抗训练eps
-gradient_accumulation_steps: 1
-n_fold: 1
-continue_training: true
+gradient_accumulation_steps: 8  # 梯度累积
+n_fold: 0.8 # 小于1时正常划分，大于1时进行交叉验证划分
+continue_training: false  # 是否从保存的模型上继续训练
 
 # save
-model_save_path: "./saved_model/deberta-v3-large_0919/"
+model_save_path: "./saved_model/deberta-v3-large_0926/"

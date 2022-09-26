@@ -8,7 +8,7 @@
 class AvgMeter:
     def __init__(self, name: str = "Metric"):
         self.name = name
-        self.avg, self.sum, self.count = [0] * 3
+        self.reset()
 
     def reset(self):
         self.avg, self.sum, self.count = [0] * 3

@@ -14,10 +14,7 @@ class EarlyStopping:
         self._patience = patience
         self.key = key
         self.reverse = reverse
-        self._best_so_far = 1000 if self.reverse else 0
-        self._epochs_with_no_improvement = 0
-        self._is_best_so_far = False
-        self._early_stop = False
+        self.reset()
 
     def state_dict(self):
         """A `Trainer` can use this to serialize the state."""
@@ -27,6 +24,12 @@ class EarlyStopping:
             'is_best_so_far': self._is_best_so_far,
             'epochs_with_no_improvement': self._epochs_with_no_improvement,
         }
+
+    def reset(self):
+        self._best_so_far = 1000 if self.reverse else 0
+        self._epochs_with_no_improvement = 0
+        self._is_best_so_far = False
+        self._early_stop = False
 
     def load_state_dict(self, state_dict) -> None:
         """Hydrate a early stopping from a serialized state."""

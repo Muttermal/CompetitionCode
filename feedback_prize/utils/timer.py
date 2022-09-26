@@ -10,9 +10,7 @@ class Timer(object):
     """Computes elapsed time."""
 
     def __init__(self):
-        self.running = True
-        self.total = 0
-        self.start = time.time()
+        self.reset()
 
     def reset(self):
         """Reset timer."""

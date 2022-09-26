@@ -20,25 +20,23 @@ def convert_batch(batch: typing.Union[list, dict]) -> dict:
 
 
 def data_split(file_path: str, split_size: typing.Union[int, float] = 0.8,
-               random_seed: int = 2022, mode: str = "", target_cols: list = None):
+               random_seed: int = 2022, target_cols: list = None):
 
     raw_data = pd.read_csv(file_path)
-    if mode == "k_fold":    # 将数据集交叉划分
-        if not isinstance(split_size, int) or split_size <= 1:
-            raise ValueError(f"split_size should be integer and greater than 1, but got {split_size}")
-        if not target_cols:
-            target_cols = raw_data.columns
+    if 0 < split_size < 1:  # 正常划分
+        train_data = raw_data.sample(frac=split_size, random_state=random_seed).reset_index(drop=True)
+        val_data = raw_data.drop(train_data.index).reset_index(drop=True)
+        return train_data, val_data
+    elif split_size == 1:   # 全部作为训练集或验证集
+        return raw_data.copy()
+    else:   # 交叉验证K折划分
+        split_size = int(split_size)
+        target_cols = raw_data.columns if not target_cols else target_cols
         data_folder = MultilabelStratifiedKFold(n_splits=split_size, shuffle=True, random_state=random_seed)
         for fold, (_, val_) in enumerate(data_folder.split(X=raw_data, y=raw_data[target_cols])):
             raw_data.loc[val_, "k_fold"] = int(fold)
         raw_data["k_fold"] = raw_data["k_fold"].astype(int)
         return raw_data
-    else:   # 简单划分为训练集和验证集
-        if split_size > 1:
-            raise ValueError(f"split_size should be less than 1, but got {split_size}")
-        train_data = raw_data.sample(frac=split_size, random_state=random_seed).reset_index(drop=True)
-        val_data = raw_data.drop(train_data.index).reset_index(drop=True)
-        return train_data, val_data
 
 
 def load_model(model: torch.nn.Module, model_saved_dir: str):
